@@ -4,13 +4,14 @@
 #
 Name     : pypi-pdocs
 Version  : 1.1.1
-Release  : 1
+Release  : 2
 URL      : https://files.pythonhosted.org/packages/e0/24/525a8fc144a0c25cc7e571e64cb37050b581f574aa518137f9d0deca3933/pdocs-1.1.1.tar.gz
 Source0  : https://files.pythonhosted.org/packages/e0/24/525a8fc144a0c25cc7e571e64cb37050b581f574aa518137f9d0deca3933/pdocs-1.1.1.tar.gz
 Summary  : A simple program and library to auto generate API documentation for Python modules.
 Group    : Development/Tools
 License  : MIT
 Requires: pypi-pdocs-bin = %{version}-%{release}
+Requires: pypi-pdocs-license = %{version}-%{release}
 Requires: pypi-pdocs-python = %{version}-%{release}
 Requires: pypi-pdocs-python3 = %{version}-%{release}
 BuildRequires : buildreq-distutils3
@@ -23,9 +24,18 @@ _________________
 %package bin
 Summary: bin components for the pypi-pdocs package.
 Group: Binaries
+Requires: pypi-pdocs-license = %{version}-%{release}
 
 %description bin
 bin components for the pypi-pdocs package.
+
+
+%package license
+Summary: license components for the pypi-pdocs package.
+Group: Default
+
+%description license
+license components for the pypi-pdocs package.
 
 
 %package python
@@ -54,13 +64,16 @@ python3 components for the pypi-pdocs package.
 %prep
 %setup -q -n pdocs-1.1.1
 cd %{_builddir}/pdocs-1.1.1
+pushd ..
+cp -a pdocs-1.1.1 buildavx2
+popd
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1641525387
+export SOURCE_DATE_EPOCH=1653350733
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -71,14 +84,35 @@ export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=auto "
 export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=auto "
 export MAKEFLAGS=%{?_smp_mflags}
 python3 -m build --wheel --skip-dependency-check --no-isolation
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export CXXFLAGS="$CXXFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FFLAGS="$FFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FCFLAGS="$FCFLAGS -m64 -march=x86-64-v3 "
+export LDFLAGS="$LDFLAGS -m64 -march=x86-64-v3 "
+python3 -m build --wheel --skip-dependency-check --no-isolation
+
+popd
 
 %install
 export MAKEFLAGS=%{?_smp_mflags}
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/package-licenses/pypi-pdocs
+cp %{_builddir}/pdocs-1.1.1/LICENSE %{buildroot}/usr/share/package-licenses/pypi-pdocs/053dfca04bfce442294d95f04940ed64ff97e1bf
+cp %{_builddir}/pdocs-1.1.1/pdocs/templates/LICENSE %{buildroot}/usr/share/package-licenses/pypi-pdocs/ded771b3245b190da0e81c76de5a80d41392c0a6
 pip install --root=%{buildroot} --no-deps --ignore-installed dist/*.whl
 echo ----[ mark ]----
 cat %{buildroot}/usr/lib/python3*/site-packages/*/requires.txt || :
 echo ----[ mark ]----
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export CXXFLAGS="$CXXFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FFLAGS="$FFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FCFLAGS="$FCFLAGS -m64 -march=x86-64-v3 "
+export LDFLAGS="$LDFLAGS -m64 -march=x86-64-v3 "
+pip install --root=%{buildroot}-v3 --no-deps --ignore-installed dist/*.whl
+popd
+/usr/bin/elf-move.py avx2 %{buildroot}-v3 %{buildroot}/usr/share/clear/optimized-elf/ %{buildroot}/usr/share/clear/filemap/filemap-%{name}
 
 %files
 %defattr(-,root,root,-)
@@ -86,6 +120,11 @@ echo ----[ mark ]----
 %files bin
 %defattr(-,root,root,-)
 /usr/bin/pdocs
+
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/pypi-pdocs/053dfca04bfce442294d95f04940ed64ff97e1bf
+/usr/share/package-licenses/pypi-pdocs/ded771b3245b190da0e81c76de5a80d41392c0a6
 
 %files python
 %defattr(-,root,root,-)
