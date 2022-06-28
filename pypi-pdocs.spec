@@ -4,7 +4,7 @@
 #
 Name     : pypi-pdocs
 Version  : 1.1.1
-Release  : 3
+Release  : 4
 URL      : https://files.pythonhosted.org/packages/e0/24/525a8fc144a0c25cc7e571e64cb37050b581f574aa518137f9d0deca3933/pdocs-1.1.1.tar.gz
 Source0  : https://files.pythonhosted.org/packages/e0/24/525a8fc144a0c25cc7e571e64cb37050b581f574aa518137f9d0deca3933/pdocs-1.1.1.tar.gz
 Summary  : A simple program and library to auto generate API documentation for Python modules.
@@ -73,7 +73,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1656389144
+export SOURCE_DATE_EPOCH=1656393538
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
